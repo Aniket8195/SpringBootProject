@@ -1,6 +1,7 @@
 package com.example.SpringMVN.Model;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
@@ -16,6 +17,7 @@ import java.util.List;
 @Getter
 @Setter
 @Data
+@NoArgsConstructor
 public class UserModel {
     @Id
     private ObjectId id;
@@ -26,5 +28,7 @@ public class UserModel {
     private String password;
     @DBRef
     private List<BookModel> books=new ArrayList<>();
+    @NonNull
+    private String role;
 
 }

@@ -2,6 +2,7 @@ package com.example.SpringMVN.Controller;
 
 
 import com.example.SpringMVN.Model.UserModel;
+import com.example.SpringMVN.Model.UserSignUpDTO;
 import com.example.SpringMVN.Repository.UserRepo;
 import com.example.SpringMVN.Service.JwtUtil;
 import com.example.SpringMVN.Service.PasswordService;
@@ -11,7 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -40,50 +43,62 @@ public class UserController {
     }
 
     @PostMapping("/signUp")
-    public ResponseEntity<String> signUp(@RequestBody UserModel user){
-       try{
-
-           if (user.getUsername().isEmpty()) {
-               return ResponseEntity.badRequest().body("Username cannot be null or empty.");
-           }
-
-           if (user.getPassword().isEmpty()) {
-               return ResponseEntity.badRequest().body("Password cannot be null or empty.");
-           }
-
-           Optional<UserModel> existingUser = userRepo.findByUsername(user.getUsername());
-           if (existingUser.isPresent()) {
-               return ResponseEntity.status(HttpStatus.CONFLICT).body("Username already exists.");
-           }
-
-           user.setPassword(passwordService.hashPassword(user.getPassword()));
-           userRepo.save(user);
-           return ResponseEntity.status(200).body("User Created");
-       }catch (Exception exception){
-           System.out.println(exception.getMessage());
-           return new ResponseEntity<>("Error Occurred", HttpStatus.BAD_REQUEST);
-       }
-
-    }
-    @PostMapping("/signIn")
-    public ResponseEntity<?> signIn(@RequestBody UserModel user) {
+    public ResponseEntity<?> signUp(@RequestBody UserSignUpDTO userSignUpDTO) {
         try {
-            Optional<UserModel> existingUserOpt = userService.getUserByUsername(user.getUsername());
+            if (userSignUpDTO.getUsername().isEmpty()) {
+                return ResponseEntity.badRequest().body("Username cannot be null or empty.");
+            }
+
+            if (userSignUpDTO.getPassword().isEmpty()) {
+                return ResponseEntity.badRequest().body("Password cannot be null or empty.");
+            }
+
+            Optional<UserModel> existingUser = userRepo.findByUsername(userSignUpDTO.getUsername());
+            if (existingUser.isPresent()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Username already exists.");
+            }
+
+            UserModel user = new UserModel();
+            user.setUsername(userSignUpDTO.getUsername());
+            user.setPassword(passwordService.hashPassword(userSignUpDTO.getPassword()));
+            user.setRole("user");
+
+            userRepo.save(user);
+            Map<String,String>mp=new HashMap<>();
+            mp.put("message","User Created");
+            return ResponseEntity.ok(mp);
+        } catch (Exception exception) {
+            System.out.println(exception.getMessage());
+            return new ResponseEntity<>("Error Occurred", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/signIn")
+    public ResponseEntity<?> signIn(@RequestBody UserSignUpDTO userSignUpDTO) {
+        try {
+            Optional<UserModel> existingUserOpt = userService.getUserByUsername(userSignUpDTO.getUsername());
 
             if (existingUserOpt.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials: User not found");
             }
 
-            UserModel existingUser = existingUserOpt.get(); // Safely retrieve the user
-            if (!passwordService.checkPassword(user.getPassword(), existingUser.getPassword())) {
+            UserModel existingUser = existingUserOpt.get();
+            if (!passwordService.checkPassword(userSignUpDTO.getPassword(), existingUser.getPassword())) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials: Incorrect password");
             }
+
+
             String token = jwtUtil.generateToken(existingUser.getUsername().concat(existingUser.getId().toString()));
-            return ResponseEntity.ok(token);
+            Map<String, String> response = new HashMap<>();
+            response.put("token", token);
+            response.put("message", "Authentication successful");
+
+            return ResponseEntity.ok(response);
 
         } catch (Exception exception) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error Occurred: " + exception.getMessage());
         }
     }
+
 
 }
