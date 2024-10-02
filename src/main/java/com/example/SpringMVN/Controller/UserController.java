@@ -42,10 +42,25 @@ public class UserController {
     @PostMapping("/signUp")
     public ResponseEntity<String> signUp(@RequestBody UserModel user){
        try{
+
+           if (user.getUsername().isEmpty()) {
+               return ResponseEntity.badRequest().body("Username cannot be null or empty.");
+           }
+
+           if (user.getPassword().isEmpty()) {
+               return ResponseEntity.badRequest().body("Password cannot be null or empty.");
+           }
+
+           Optional<UserModel> existingUser = userRepo.findByUsername(user.getUsername());
+           if (existingUser.isPresent()) {
+               return ResponseEntity.status(HttpStatus.CONFLICT).body("Username already exists.");
+           }
+
            user.setPassword(passwordService.hashPassword(user.getPassword()));
            userRepo.save(user);
            return ResponseEntity.status(200).body("User Created");
        }catch (Exception exception){
+           System.out.println(exception.getMessage());
            return new ResponseEntity<>("Error Occurred", HttpStatus.BAD_REQUEST);
        }
 
@@ -53,26 +68,17 @@ public class UserController {
     @PostMapping("/signIn")
     public ResponseEntity<?> signIn(@RequestBody UserModel user) {
         try {
-            // Fetch the user by username using UserService
-            System.out.println("Signing in user: " + user.getUsername());
             Optional<UserModel> existingUserOpt = userService.getUserByUsername(user.getUsername());
 
-            // Check if the user exists and validate the password
             if (existingUserOpt.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials: User not found");
             }
 
             UserModel existingUser = existingUserOpt.get(); // Safely retrieve the user
-            System.out.println("Signing in user: " + existingUser.getUsername());
-            // Validate the password
             if (!passwordService.checkPassword(user.getPassword(), existingUser.getPassword())) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials: Incorrect password");
             }
-            System.out.println("generating token");
-            // Generate JWT token
             String token = jwtUtil.generateToken(existingUser.getUsername().concat(existingUser.getId().toString()));
-            System.out.println("token"+token);
-            // Return the JWT token
             return ResponseEntity.ok(token);
 
         } catch (Exception exception) {
