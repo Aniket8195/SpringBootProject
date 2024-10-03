@@ -7,10 +7,13 @@ import com.example.SpringMVN.Repository.UserRepo;
 import com.example.SpringMVN.Service.JwtUtil;
 import com.example.SpringMVN.Service.PasswordService;
 import com.example.SpringMVN.Service.UserService;
+import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpServletResponse;
+
 
 import java.util.HashMap;
 import java.util.List;
@@ -61,7 +64,9 @@ public class UserController {
             UserModel user = new UserModel();
             user.setUsername(userSignUpDTO.getUsername());
             user.setPassword(passwordService.hashPassword(userSignUpDTO.getPassword()));
-            user.setRole("user");
+
+            //user.getRole().add("admin");
+            user.getRole().add("user");
 
             userRepo.save(user);
             Map<String,String>mp=new HashMap<>();
@@ -88,7 +93,13 @@ public class UserController {
             }
 
 
-            String token = jwtUtil.generateToken(existingUser.getUsername().concat(existingUser.getId().toString()));
+            String token = jwtUtil.generateToken(existingUser.getUsername().concat(existingUser.getId().toString()),existingUser.getRole().get(0));
+//            Cookie jwtCookie = new Cookie("jwt", token);
+//            jwtCookie.setHttpOnly(true);
+//            jwtCookie.setSecure(true);
+//            jwtCookie.setPath("/");
+//            jwtCookie.setMaxAge(7 * 24 * 60 * 60);
+
             Map<String, String> response = new HashMap<>();
             response.put("token", token);
             response.put("message", "Authentication successful");

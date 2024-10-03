@@ -6,10 +6,16 @@ import com.example.SpringMVN.Repository.UserRepo;
 import org.bson.types.ObjectId;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 
@@ -34,12 +40,11 @@ public class UserService {
     public Optional<UserModel> getUserById(ObjectId id) {
         return userRepo.findById(id);
     }
-    public List<BookModel>getBooks(UserModel user){
-         return user.getBooks();
+
+    public List<BookModel> getBooks(UserModel user) {
+        return user.getBooks();
     }
-    public List<UserModel>getUsers(){
-        return userRepo.findAll();
-    }
+
     public void deleteUser(ObjectId id) {
         userRepo.deleteById(id);
     }
@@ -51,5 +56,10 @@ public class UserService {
     public Optional<UserModel> getUserByUsername(String username) {
         return userRepo.findByUsername(username);
     }
+    public List<UserModel>getUsers(){
+        return userRepo.findAll();
+    }
+
+
 }
 

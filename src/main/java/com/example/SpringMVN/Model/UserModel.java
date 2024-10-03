@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.lang.NonNull;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +19,7 @@ import java.util.List;
 @Setter
 @Data
 @NoArgsConstructor
-public class UserModel {
+public class UserModel{
     @Id
     private ObjectId id;
     @Indexed(unique = true)
@@ -29,6 +30,6 @@ public class UserModel {
     @DBRef
     private List<BookModel> books=new ArrayList<>();
     @NonNull
-    private String role;
+    private List<String> role= new ArrayList<>();
 
 }

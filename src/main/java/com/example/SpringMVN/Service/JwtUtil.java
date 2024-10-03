@@ -15,8 +15,9 @@ public class JwtUtil {
 
     private final String SECRET_KEY = "secret";
 
-    public String generateToken(String email) {
+    public String generateToken(String email,String role) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role);
         return createToken(claims, email);
     }
 
@@ -29,6 +30,9 @@ public class JwtUtil {
 
     public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class));
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
