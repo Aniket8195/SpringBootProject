@@ -65,8 +65,8 @@ public class UserController {
             user.setUsername(userSignUpDTO.getUsername());
             user.setPassword(passwordService.hashPassword(userSignUpDTO.getPassword()));
 
-            //user.getRole().add("admin");
-            user.getRole().add("user");
+            user.getRole().add("admin");
+            //user.getRole().add("user");
 
             userRepo.save(user);
             Map<String,String>mp=new HashMap<>();

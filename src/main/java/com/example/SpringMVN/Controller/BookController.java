@@ -3,6 +3,8 @@ import com.example.SpringMVN.Model.UserModel;
 import com.example.SpringMVN.Repository.BookRepo;
 import com.example.SpringMVN.Service.BookService;
 import com.example.SpringMVN.Service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,12 +27,15 @@ public class BookController {
     @Autowired
     private BookService bookService;
 
+    private static final Logger logger= LoggerFactory.getLogger(BookService.class);
+
     @PostMapping
     public ResponseEntity<BookModel> addBook(@RequestBody BookModel book,@RequestParam String username){
         try {
             BookModel newBook = bookService.addBook(book, username);
             return new ResponseEntity<>(newBook, HttpStatus.CREATED);
         } catch (Exception exception) {
+            logger.error(exception.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -40,6 +45,7 @@ public class BookController {
     public ResponseEntity<List<BookModel>> getBooks(){
         List<BookModel>res=bookRepo.findAll();
         if(!res.isEmpty()){
+            logger.error("No Books in DB");
             return new ResponseEntity<>(res, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -49,6 +55,7 @@ public class BookController {
     public ResponseEntity<Optional<BookModel>> getBook(@PathVariable String id){
         Optional<BookModel> res=bookRepo.findById(id);
         if(res.isPresent()){
+            logger.error("Books not found for user{id}");
             return new ResponseEntity<>(res,HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -81,6 +88,7 @@ public class BookController {
 
             return new ResponseEntity<>("Book Deleted",HttpStatus.OK);
         }catch (Exception exception){
+            logger.error(exception.getMessage());
             return new ResponseEntity<>("Something went wrong",HttpStatus.BAD_REQUEST);
         }
     }

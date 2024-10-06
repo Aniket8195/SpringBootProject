@@ -4,18 +4,12 @@ import com.example.SpringMVN.Model.BookModel;
 import com.example.SpringMVN.Model.UserModel;
 import com.example.SpringMVN.Repository.UserRepo;
 import org.bson.types.ObjectId;
-
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 
@@ -24,6 +18,16 @@ public class UserService {
 
     private final UserRepo userRepo;
 
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    public List<UserModel> getUserForSA(){
+        Query query=new Query();
+        query.addCriteria(Criteria.where("email").exists(true));
+        query.addCriteria(Criteria.where("sentimentAnalysis").is(true));
+        return mongoTemplate.find(query,UserModel.class);
+
+    }
     @Autowired
     public UserService(UserRepo userRepo) {
         this.userRepo = userRepo;

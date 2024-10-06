@@ -27,6 +27,9 @@ public class UserModel{
     private String username;
     @NonNull
     private String password;
+    private String email;
+    private boolean sentimentAnalysis;
+
     @DBRef
     private List<BookModel> books=new ArrayList<>();
     @NonNull

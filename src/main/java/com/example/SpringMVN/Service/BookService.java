@@ -3,9 +3,9 @@ package com.example.SpringMVN.Service;
 import com.example.SpringMVN.Model.BookModel;
 import com.example.SpringMVN.Model.UserModel;
 import com.example.SpringMVN.Repository.BookRepo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +19,9 @@ public class BookService {
 
     @Autowired
     BookRepo bookRepo;
+
+
+    private static final Logger logger= LoggerFactory.getLogger(BookService.class);
 
     @Transactional
     public BookModel addBook(BookModel book, String username){
@@ -37,6 +40,7 @@ public class BookService {
             return newBook;
 
         } catch (Exception e) {
+            logger.error(e.getMessage());
             throw new RuntimeException("Failed to add book", e);
         }
     }
@@ -57,6 +61,7 @@ public class BookService {
             userService.saveUser(existingUser);
             bookRepo.deleteById(id);
         }catch (Exception e){
+            logger.error(e.getMessage());
             throw  new RuntimeException("Failed to add book", e);
         }
     }
